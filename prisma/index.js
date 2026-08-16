@@ -11,7 +11,16 @@ app.get("/health-check", (req, res) => {
   });
 });
 
-app.post("/api/users", async (req, res) => {
+
+app.get("/api/user/list", async (req, res) => {
+  const users = await prisma.user.findMany();
+  return res.send({
+    userList: users,
+  });
+});
+
+
+app.post("/api/user/create", async (req, res) => {
   const { email, name } = req.body;
   // Todo Validation
   const user = await prisma.user.create({
@@ -21,7 +30,54 @@ app.post("/api/users", async (req, res) => {
     },
   });
 
+  return res.send({
+    message: "User Created Successfully",
+    user,
+  });
+});
+
+
+app.get("/api/user/:id", async (req, res) => {
+  const userid = Number(req.params.id);
+
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userid,
+    },
+  });
+
   return res.json({ user });
+});
+
+
+app.delete("/api/user/:id", async (req, res) => {
+  const userid = Number(req.params.id);
+
+  const user = await prisma.user.delete({
+    where: {
+      id: userid,
+    },
+  });
+
+  return res.json({ message: "User Deleted Successfully", user });
+});
+
+
+app.post("/api/user/update/:id", async (req, res) => {
+  const userid = Number(req.params.id);
+  const { email, name } = req.body;
+
+  const user = await prisma.user.update({
+    where: {
+      id: userid,
+    },
+    data: {
+      email,
+      name,
+    },
+  });
+
+  return res.json({ message: "User Updated Successfully", user });
 });
 
 
